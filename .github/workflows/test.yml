@@ -1,0 +1,50 @@
+name: Test setup-tessl
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-pinned:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned version
+        id: setup
+        uses: ./
+        with:
+          version: "0.73.0"
+
+      - name: Check tessl is on PATH
+        run: which tessl
+
+      - name: Check outputs
+        run: |
+          echo "Installed version: ${{ steps.setup.outputs.version }}"
+          echo "Binary path: ${{ steps.setup.outputs.path }}"
+
+  test-latest:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install latest version
+        id: setup
+        uses: ./
+
+      - name: Check tessl is on PATH
+        run: which tessl
+
+      - name: Verify resolved version
+        run: |
+          echo "Resolved version: ${{ steps.setup.outputs.version }}"
+          test -n "${{ steps.setup.outputs.version }}"

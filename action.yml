@@ -1,0 +1,99 @@
+name: Setup Tessl CLI
+description: Install the Tessl CLI in a GitHub Actions workflow
+author: tesslio
+branding:
+  icon: terminal
+  color: blue
+
+inputs:
+  version:
+    description: Tessl CLI version to install (e.g. "0.73.0", or "latest")
+    required: false
+    default: "latest"
+
+outputs:
+  version:
+    description: The version of Tessl CLI that was installed
+    value: ${{ steps.resolve.outputs.version }}
+  path:
+    description: Path to the installed tessl binary
+    value: ${{ steps.install.outputs.binary-path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve version
+      id: resolve
+      shell: bash
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+      run: |
+        if [ "$INPUT_VERSION" = "latest" ]; then
+          VERSION="$(curl -fsSL "https://install.tessl.io/scripts/latest.sh" | grep 'TESSL_VERSION="' | head -1 | sed 's/.*TESSL_VERSION="\([^"]*\)".*/\1/')"
+          if [ -z "$VERSION" ]; then
+            echo "::error::Failed to resolve latest tessl version"
+            exit 1
+          fi
+          echo "Resolved latest version: ${VERSION}"
+        else
+          VERSION="$INPUT_VERSION"
+        fi
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+    - name: Detect platform
+      id: platform
+      shell: bash
+      run: |
+        OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
+        ARCH="$(uname -m)"
+        case "$ARCH" in
+          x86_64|amd64) ARCH="x64" ;;
+          aarch64|arm64) ARCH="arm64" ;;
+          *) echo "::error::Unsupported architecture: $ARCH" && exit 1 ;;
+        esac
+
+        LIBC=""
+        if [ "$OS" = "linux" ]; then
+          if [ -f /etc/alpine-release ] || (command -v ldd >/dev/null 2>&1 && ldd /bin/ls 2>&1 | grep -q musl); then
+            LIBC="-musl"
+          fi
+        fi
+
+        PLATFORM="${OS}-${ARCH}${LIBC}"
+        echo "platform=$PLATFORM" >> "$GITHUB_OUTPUT"
+        echo "Detected platform: $PLATFORM"
+
+    - name: Download and install Tessl CLI
+      id: install
+      shell: bash
+      env:
+        VERSION: ${{ steps.resolve.outputs.version }}
+        PLATFORM: ${{ steps.platform.outputs.platform }}
+      run: |
+        URL="https://install.tessl.io/binaries/${VERSION}/tessl-${VERSION}-${PLATFORM}.tar.gz"
+        INSTALL_DIR="${RUNNER_TOOL_CACHE}/tessl/${VERSION}/${PLATFORM}"
+        mkdir -p "$INSTALL_DIR"
+
+        echo "Downloading tessl ${VERSION} for ${PLATFORM}..."
+        echo "URL: ${URL}"
+
+        curl -fsSL "$URL" -o "$INSTALL_DIR/tessl.tar.gz"
+        tar -xzf "$INSTALL_DIR/tessl.tar.gz" -C "$INSTALL_DIR"
+        rm "$INSTALL_DIR/tessl.tar.gz"
+        mv "$INSTALL_DIR/tessl-${VERSION}-${PLATFORM}" "$INSTALL_DIR/tessl"
+        chmod +x "$INSTALL_DIR/tessl"
+
+        echo "binary-path=${INSTALL_DIR}/tessl" >> "$GITHUB_OUTPUT"
+
+    - name: Add to PATH
+      shell: bash
+      env:
+        VERSION: ${{ steps.resolve.outputs.version }}
+        PLATFORM: ${{ steps.platform.outputs.platform }}
+      run: echo "${RUNNER_TOOL_CACHE}/tessl/${VERSION}/${PLATFORM}" >> "$GITHUB_PATH"
+
+    - name: Verify installation
+      shell: bash
+      run: |
+        echo "Verifying tessl installation..."
+        tessl --version
