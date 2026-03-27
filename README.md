@@ -1,6 +1,6 @@
 # setup-tessl
 
-A GitHub Action to install the [Tessl](https://tessl.io) CLI in your workflows.
+A GitHub Action to install the [Tessl](https://tessl.io) CLI in your workflows. Optionally configure authentication so subsequent steps can run authenticated commands.
 
 ## Usage
 
@@ -16,11 +16,30 @@ Or pin a specific version:
     version: "0.73.0"
 ```
 
+### Authenticated usage
+
+Pass an API token as `token` to make it available as `TESSL_TOKEN` for every subsequent step in the job. Store the token as a [repository or organization secret](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions) and reference it with `${{ secrets.TESSL_TOKEN }}`.
+
+API tokens can be created in your workspace settings.
+
+```yaml
+- uses: tesslio/setup-tessl@v1
+  with:
+    token: ${{ secrets.TESSL_TOKEN }}
+```
+
+Once configured, all later steps in the same job can call the Tessl CLI as authenticated without any extra setup:
+
+```yaml
+- run: tessl publish
+```
+
 ## Inputs
 
-| Input     | Required | Default    | Description                                    |
-|-----------|----------|------------|------------------------------------------------|
-| `version` | No       | `"latest"` | Tessl CLI version to install, or `"latest"`   |
+| Input     | Required | Default    | Description                                                        |
+|-----------|----------|------------|--------------------------------------------------------------------|
+| `version` | No       | `"latest"` | Tessl CLI version to install, or `"latest"`                       |
+| `token`   | No       | —          | Tessl API token. When set, exported as `TESSL_TOKEN` for all subsequent steps. |
 
 ## Outputs
 
@@ -40,7 +59,9 @@ Or pin a specific version:
 | `macos-latest`    | `darwin-arm64`   |
 | `macos-13`        | `darwin-x64`     |
 
-## Example
+## Examples
+
+### Code review on pull requests
 
 ```yaml
 name: Review
@@ -52,7 +73,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: tesslio/setup-tessl@v1
+        with:
+          token: ${{ secrets.TESSL_TOKEN }}
       - run: tessl review
+```
+
+### Pin a CLI version
+
+```yaml
+- uses: tesslio/setup-tessl@v1
+  with:
+    version: "0.73.0"
+    token: ${{ secrets.TESSL_TOKEN }}
 ```
 
 ## License

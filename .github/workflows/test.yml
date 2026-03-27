@@ -48,3 +48,37 @@ jobs:
         run: |
           echo "Resolved version: ${{ steps.setup.outputs.version }}"
           test -n "${{ steps.setup.outputs.version }}"
+
+  test-token:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install with token
+        uses: ./
+        with:
+          token: "test-token-value"
+
+      - name: Verify TESSL_TOKEN is set
+        run: |
+          if [ -z "$TESSL_TOKEN" ]; then
+            echo "::error::TESSL_TOKEN is not set"
+            exit 1
+          fi
+          echo "TESSL_TOKEN is set"
+
+  test-no-token:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install without token
+        uses: ./
+
+      - name: Verify TESSL_TOKEN is not set
+        run: |
+          if [ -n "$TESSL_TOKEN" ]; then
+            echo "::error::TESSL_TOKEN should not be set when no token is provided"
+            exit 1
+          fi
+          echo "TESSL_TOKEN is correctly unset"
