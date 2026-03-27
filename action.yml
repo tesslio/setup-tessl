@@ -10,6 +10,9 @@ inputs:
     description: Tessl CLI version to install (e.g. "0.73.0", or "latest")
     required: false
     default: "latest"
+  token:
+    description: Tessl API token for authentication. When set, exported as TESSL_TOKEN for all subsequent steps.
+    required: false
 
 outputs:
   version:
@@ -97,3 +100,12 @@ runs:
       run: |
         echo "Verifying tessl installation..."
         tessl --version
+
+    - name: Configure authentication
+      if: ${{ inputs.token != '' }}
+      shell: bash
+      env:
+        TESSL_TOKEN: ${{ inputs.token }}
+      run: |
+        echo "::add-mask::${TESSL_TOKEN}"
+        echo "TESSL_TOKEN=${TESSL_TOKEN}" >> "$GITHUB_ENV"
