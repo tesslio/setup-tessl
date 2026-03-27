@@ -5,13 +5,13 @@ A GitHub Action to install the [Tessl](https://tessl.io) CLI in your workflows. 
 ## Usage
 
 ```yaml
-- uses: tesslio/setup-tessl@v1
+- uses: tesslio/setup-tessl@v2
 ```
 
 Or pin a specific version:
 
 ```yaml
-- uses: tesslio/setup-tessl@v1
+- uses: tesslio/setup-tessl@v2
   with:
     version: "0.73.0"
 ```
@@ -23,7 +23,7 @@ Pass an API token as `token` to make it available as `TESSL_TOKEN` for every sub
 API tokens can be created in your workspace settings.
 
 ```yaml
-- uses: tesslio/setup-tessl@v1
+- uses: tesslio/setup-tessl@v2
   with:
     token: ${{ secrets.TESSL_TOKEN }}
 ```
@@ -61,7 +61,7 @@ Once configured, all later steps in the same job can call the Tessl CLI as authe
 
 ## Examples
 
-### Code review on pull requests
+### Review a skill on pull requests
 
 ```yaml
 name: Review
@@ -72,16 +72,63 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: tesslio/setup-tessl@v1
+      - uses: tesslio/setup-tessl@v2
         with:
           token: ${{ secrets.TESSL_TOKEN }}
-      - run: tessl review
+      - run: tessl skill review
+```
+
+### Publish a tile on push
+
+```yaml
+name: Publish
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: tesslio/setup-tessl@v2
+        with:
+          token: ${{ secrets.TESSL_TOKEN }}
+      - run: tessl tile publish
+```
+
+### Publish multiple tiles
+
+Use a matrix strategy to publish tiles in parallel, each with independent status:
+
+```yaml
+name: Publish
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tile: [tiles/auth, tiles/payments, tiles/notifications]
+    defaults:
+      run:
+        working-directory: ${{ matrix.tile }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: tesslio/setup-tessl@v2
+        with:
+          token: ${{ secrets.TESSL_TOKEN }}
+      - run: tessl tile lint
+      - run: tessl tile publish
 ```
 
 ### Pin a CLI version
 
 ```yaml
-- uses: tesslio/setup-tessl@v1
+- uses: tesslio/setup-tessl@v2
   with:
     version: "0.73.0"
     token: ${{ secrets.TESSL_TOKEN }}
