@@ -10,6 +10,9 @@ inputs:
     description: Tessl CLI version to install (e.g. "0.73.0", or "latest")
     required: false
     default: "latest"
+  checksum:
+    description: Expected SHA-256 hash of the downloaded tarball. When set, the action verifies the download before extracting. Obtain with "shasum -a 256 tessl-<version>-<platform>.tar.gz".
+    required: false
   token:
     description: Tessl API token for authentication. When set, exported as TESSL_TOKEN for all subsequent steps.
     required: false
@@ -72,6 +75,7 @@ runs:
       env:
         VERSION: ${{ steps.resolve.outputs.version }}
         PLATFORM: ${{ steps.platform.outputs.platform }}
+        EXPECTED_CHECKSUM: ${{ inputs.checksum }}
       run: |
         URL="https://install.tessl.io/binaries/${VERSION}/tessl-${VERSION}-${PLATFORM}.tar.gz"
         INSTALL_DIR="${RUNNER_TOOL_CACHE}/tessl/${VERSION}/${PLATFORM}"
@@ -81,6 +85,17 @@ runs:
         echo "URL: ${URL}"
 
         curl -fsSL "$URL" -o "$INSTALL_DIR/tessl.tar.gz"
+
+        if [ -n "$EXPECTED_CHECKSUM" ]; then
+          ACTUAL="$(shasum -a 256 "$INSTALL_DIR/tessl.tar.gz" | awk '{print $1}')"
+          if [ "$ACTUAL" != "$EXPECTED_CHECKSUM" ]; then
+            echo "::error::Checksum mismatch for tessl ${VERSION} (${PLATFORM}). Expected: ${EXPECTED_CHECKSUM}, got: ${ACTUAL}"
+            rm -f "$INSTALL_DIR/tessl.tar.gz"
+            exit 1
+          fi
+          echo "Checksum verified: ${ACTUAL}"
+        fi
+
         tar -xzf "$INSTALL_DIR/tessl.tar.gz" -C "$INSTALL_DIR"
         rm "$INSTALL_DIR/tessl.tar.gz"
         mv "$INSTALL_DIR/tessl-${VERSION}-${PLATFORM}" "$INSTALL_DIR/tessl"
