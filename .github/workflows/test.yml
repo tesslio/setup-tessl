@@ -82,3 +82,43 @@ jobs:
             exit 1
           fi
           echo "TESSL_TOKEN is correctly unset"
+
+  test-anonymous-id:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install
+        uses: ./
+
+      - name: Verify anonymous ID exists and has correct format
+        run: |
+          ID_FILE="$HOME/.tessl/anonymous-id"
+          if [ ! -f "$ID_FILE" ]; then
+            echo "::error::Anonymous ID file not created"
+            exit 1
+          fi
+          ID=$(cat "$ID_FILE")
+          if ! echo "$ID" | grep -qE '^anon-[0-9a-f]{32}$'; then
+            echo "::error::Anonymous ID has wrong format: $ID"
+            exit 1
+          fi
+          echo "Anonymous ID: $ID"
+
+      - name: Verify anonymous ID is deterministic
+        run: |
+          EXISTING=$(cat "$HOME/.tessl/anonymous-id")
+          if command -v sha256sum >/dev/null 2>&1; then
+            HASH=$(echo -n "setup-tessl-action:${GITHUB_REPOSITORY_ID}" | sha256sum | cut -c1-32)
+          else
+            HASH=$(echo -n "setup-tessl-action:${GITHUB_REPOSITORY_ID}" | shasum -a 256 | cut -c1-32)
+          fi
+          EXPECTED="anon-${HASH}"
+          if [ "$EXISTING" != "$EXPECTED" ]; then
+            echo "::error::Anonymous ID mismatch: got '$EXISTING', expected '$EXPECTED'"
+            exit 1
+          fi
+          echo "Anonymous ID is deterministic: $EXISTING"
