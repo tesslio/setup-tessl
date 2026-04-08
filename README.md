@@ -134,6 +134,14 @@ jobs:
     token: ${{ secrets.TESSL_TOKEN }}
 ```
 
+## Extensions
+
+Community actions that build on top of `setup-tessl`:
+
+| Action | Description |
+|--------|-------------|
+| [tesslio/tessl-smart-publish](https://github.com/tesslio/tessl-smart-publish) | Publish tiles with automatic patch version bumping — queries the registry for the latest version, bumps patch, publishes, and commits the updated `tile.json` back. Respects manual version bumps. |
+
 ## License
 
 MIT
