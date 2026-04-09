@@ -140,7 +140,7 @@ Community actions that build on top of `setup-tessl`:
 
 | Action | Description | How to use |
 |--------|-------------|------------|
-| [tesslio/tessl-smart-publish](https://github.com/tesslio/tessl-smart-publish) | Publish tiles with automatic patch version bumping — queries the registry for the latest version, bumps patch, publishes, and commits the updated `tile.json` back. Respects manual version bumps. | Use instead of `setup-tessl` + `tessl tile publish`. It includes `setup-tessl` internally. |
+| [tesslio/patch-version-publish](https://github.com/tesslio/patch-version-publish) | Publish tiles with automatic patch version bumping — queries the registry for the latest version, bumps patch, publishes, and commits the updated `tile.json` back. Respects manual version bumps. | Use instead of `setup-tessl` + `tessl tile publish`. It includes `setup-tessl` internally. |
 
 ## License
 
