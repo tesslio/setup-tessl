@@ -1,6 +1,6 @@
 # setup-tessl
 
-A GitHub Action to install the [Tessl](https://tessl.io) CLI in your workflows. Optionally configure authentication so subsequent steps can run authenticated commands.
+A GitHub Action to use the [Tessl](https://tessl.io) CLI in your workflows
 
 ## Usage
 
@@ -8,19 +8,13 @@ A GitHub Action to install the [Tessl](https://tessl.io) CLI in your workflows. 
 - uses: tesslio/setup-tessl@v2
 ```
 
-Or pin a specific version:
+### Authentication
 
-```yaml
-- uses: tesslio/setup-tessl@v2
-  with:
-    version: "0.73.0"
-```
-
-### Authenticated usage
-
-Pass an API token as `token` to make it available as `TESSL_TOKEN` for every subsequent step in the job. Store the token as a [repository or organization secret](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions) and reference it with `${{ secrets.TESSL_TOKEN }}`.
-
-API tokens can be created in your workspace settings.
+1. Create an API token in your workspace settings in the
+   [Tessl Web UI](https://tessl.io)
+2. Store the token as a
+   [repository or organization secret](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions)
+   and reference it with `${{ secrets.TESSL_TOKEN }}`.
 
 ```yaml
 - uses: tesslio/setup-tessl@v2
@@ -28,40 +22,19 @@ API tokens can be created in your workspace settings.
     token: ${{ secrets.TESSL_TOKEN }}
 ```
 
-Once configured, all later steps in the same job can call the Tessl CLI as authenticated without any extra setup:
+Once configured, all later steps in the same job can call the Tessl CLI as
+authenticated without any extra setup:
 
 ```yaml
 - run: tessl publish
 ```
 
-## Inputs
-
-| Input     | Required | Default    | Description                                                        |
-|-----------|----------|------------|--------------------------------------------------------------------|
-| `version` | No       | `"latest"` | Tessl CLI version to install, or `"latest"`                       |
-| `token`   | No       | —          | Tessl API token. When set, exported as `TESSL_TOKEN` for all subsequent steps. |
-
-## Outputs
-
-| Output    | Description                            |
-|-----------|----------------------------------------|
-| `version` | The version of Tessl CLI installed     |
-| `path`    | Path to the installed `tessl` binary   |
-
-## Supported Platforms
-
-| Runner            | Platform         |
-|-------------------|------------------|
-| `ubuntu-latest`   | `linux-x64`      |
-| `ubuntu-24.04-arm`| `linux-arm64`    |
-| Alpine-based      | `linux-x64-musl`   |
-| Alpine-based ARM  | `linux-arm64-musl` |
-| `macos-latest`    | `darwin-arm64`   |
-| `macos-13`        | `darwin-x64`     |
-
 ## Examples
 
-### Review a skill on pull requests
+### Review a skill on pull request
+
+This will trigger a review of a given skill, on pull request. You can optionally
+set a score threshold to ensure skills don't degrade over time.
 
 ```yaml
 name: Review
@@ -71,11 +44,13 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: tesslio/setup-tessl@v2
         with:
           token: ${{ secrets.TESSL_TOKEN }}
-      - run: tessl skill review
+      - run: tessl skill review path/to/SKILL.md
+      # Optionally gate on review score
+      # - run skill review --threshold 80
 ```
 
 ### Publish a tile on push
@@ -90,7 +65,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: tesslio/setup-tessl@v2
         with:
           token: ${{ secrets.TESSL_TOKEN }}
@@ -98,8 +73,6 @@ jobs:
 ```
 
 ### Publish multiple tiles
-
-Use a matrix strategy to publish tiles in parallel, each with independent status:
 
 ```yaml
 name: Publish
@@ -117,7 +90,7 @@ jobs:
       run:
         working-directory: ${{ matrix.tile }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: tesslio/setup-tessl@v2
         with:
           token: ${{ secrets.TESSL_TOKEN }}
@@ -138,10 +111,21 @@ jobs:
 
 Community actions that build on top of `setup-tessl`:
 
-| Action | Description | How to use |
-|--------|-------------|------------|
+| Action                                                                            | Description                                                                                                                                                                                        | How to use                                                                                 |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | [tesslio/patch-version-publish](https://github.com/tesslio/patch-version-publish) | Publish tiles with automatic patch version bumping — queries the registry for the latest version, bumps patch, publishes, and commits the updated `tile.json` back. Respects manual version bumps. | Use instead of `setup-tessl` + `tessl tile publish`. It includes `setup-tessl` internally. |
 
 ## License
 
 MIT
+
+## Supported Platforms
+
+| Runner             | Platform           |
+| ------------------ | ------------------ |
+| `ubuntu-latest`    | `linux-x64`        |
+| `ubuntu-24.04-arm` | `linux-arm64`      |
+| Alpine-based       | `linux-x64-musl`   |
+| Alpine-based ARM   | `linux-arm64-musl` |
+| `macos-latest`     | `darwin-arm64`     |
+| `macos-13`         | `darwin-x64`       |
