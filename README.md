@@ -64,6 +64,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v6
       - uses: tesslio/setup-tessl@v2
@@ -83,6 +86,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     strategy:
       matrix:
         tile: [tiles/auth, tiles/payments, tiles/notifications]
