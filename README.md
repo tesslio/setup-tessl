@@ -53,7 +53,7 @@ jobs:
       # - run skill review --threshold 80
 ```
 
-### Publish a tile on push
+### Publish a plugin on push
 
 ```yaml
 name: Publish
@@ -72,10 +72,10 @@ jobs:
       - uses: tesslio/setup-tessl@v2
         with:
           token: ${{ secrets.TESSL_TOKEN }}
-      - run: tessl tile publish
+      - run: tessl plugin publish
 ```
 
-### Publish multiple tiles
+### Publish multiple plugins
 
 ```yaml
 name: Publish
@@ -91,17 +91,17 @@ jobs:
       contents: read
     strategy:
       matrix:
-        tile: [tiles/auth, tiles/payments, tiles/notifications]
+        plugin: [plugins/auth, plugins/payments, plugins/notifications]
     defaults:
       run:
-        working-directory: ${{ matrix.tile }}
+        working-directory: ${{ matrix.plugin }}
     steps:
       - uses: actions/checkout@v6
       - uses: tesslio/setup-tessl@v2
         with:
           token: ${{ secrets.TESSL_TOKEN }}
-      - run: tessl tile lint
-      - run: tessl tile publish
+      - run: tessl plugin lint
+      - run: tessl plugin publish
 ```
 
 ### Pin a CLI version
@@ -119,7 +119,7 @@ Community actions that build on top of `setup-tessl`:
 
 | Action                                                                            | Description                                                                                                                                                                                        | How to use                                                                                 |
 | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| [tesslio/patch-version-publish](https://github.com/tesslio/patch-version-publish) | Publish tiles with automatic patch version bumping — queries the registry for the latest version, bumps patch, publishes, and commits the updated `tile.json` back. Respects manual version bumps. | Use instead of `setup-tessl` + `tessl tile publish`. It includes `setup-tessl` internally. |
+| [tesslio/patch-version-publish](https://github.com/tesslio/patch-version-publish) | Publish plugins with automatic patch version bumping — queries the registry for the latest version, bumps patch, publishes, and commits the updated `.tessl-plugin/plugin.json` back. Respects manual version bumps. | Use instead of `setup-tessl` + `tessl plugin publish`. It includes `setup-tessl` internally. |
 
 ## License
 
