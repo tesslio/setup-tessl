@@ -1,0 +1,25 @@
+README.md
+  s_5d7c02cdc287a7::t_44fff3162269af 56,75,78,94,97,103-104
+  h_a2c0de74c754c6 122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "17c1431af49f224dd2d2c16a29a66aefadf6db0a",
+  "prompts": {},
+  "humans": {
+    "h_a2c0de74c754c6": {
+      "author": "Doogal <doogal@tessl.io>"
+    }
+  },
+  "sessions": {
+    "s_5d7c02cdc287a7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9620309b-18c7-4006-b0e4-80263b967957",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Doogal <doogal@tessl.io>"
+    }
+  }
+}
