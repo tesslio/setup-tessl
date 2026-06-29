@@ -29,6 +29,9 @@ authenticated without any extra setup:
 - run: tessl publish
 ```
 
+The token is exported to later workflow steps as both `TESSL_TOKEN` and
+`TESSL_API_TOKEN` for compatibility with Tessl CLI integrations.
+
 ## Examples
 
 ### Review a skill on pull request

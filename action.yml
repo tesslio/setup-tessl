@@ -11,7 +11,7 @@ inputs:
     required: false
     default: "latest"
   token:
-    description: Tessl API token for authentication. When set, exported as TESSL_TOKEN for all subsequent steps.
+    description: Tessl API token for authentication. When set, exported as TESSL_TOKEN and TESSL_API_TOKEN for all subsequent steps.
     required: false
 
 outputs:
@@ -109,3 +109,4 @@ runs:
       run: |
         echo "::add-mask::${TESSL_TOKEN}"
         echo "TESSL_TOKEN=${TESSL_TOKEN}" >> "$GITHUB_ENV"
+        echo "TESSL_API_TOKEN=${TESSL_TOKEN}" >> "$GITHUB_ENV"
