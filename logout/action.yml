@@ -1,0 +1,6 @@
+name: Tessl logout (post)
+description: Logs the Tessl CLI out of the runner at job completion (best effort).
+runs:
+  using: node20
+  main: main.js
+  post: post.js
