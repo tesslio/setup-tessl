@@ -73,7 +73,11 @@ runs:
         VERSION: ${{ steps.resolve.outputs.version }}
         PLATFORM: ${{ steps.platform.outputs.platform }}
       run: |
-        URL="https://install.tessl.io/binaries/${VERSION}/tessl-${VERSION}-${PLATFORM}.tar.gz"
+        # A version may carry SemVer build metadata, introduced by a `+`. The CDN requires that `+`
+        # percent-encoded, so the URL uses the encoded form while filesystem paths and the archive's
+        # own entry name keep the literal version.
+        URL_VERSION="${VERSION//+/%2B}"
+        URL="https://install.tessl.io/binaries/${URL_VERSION}/tessl-${URL_VERSION}-${PLATFORM}.tar.gz"
         INSTALL_DIR="${RUNNER_TOOL_CACHE}/tessl/${VERSION}/${PLATFORM}"
         mkdir -p "$INSTALL_DIR"
 
