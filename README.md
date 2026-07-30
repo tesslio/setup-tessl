@@ -33,8 +33,15 @@ authenticated without any extra setup:
 
 ### Review a skill on pull request
 
-This will trigger a review of a given skill, on pull request. You can optionally
-set a score threshold to ensure skills don't degrade over time.
+This runs a quality review of a skill on every pull request. The command fails the
+job when the skill has validation errors, such as a malformed `name` or a missing
+`description`. Add `--threshold` to fail on the review score as well, so skills
+don't degrade over time, or `--threshold 0` to report a score without ever failing
+the job.
+
+Reviews run against a Tessl workspace – pass its name or ID with `--workspace`
+(`tessl workspace list` shows what your token can see). This command needs Tessl
+CLI 0.90.0 or later, which the default `latest` installs.
 
 ```yaml
 name: Review
@@ -48,10 +55,14 @@ jobs:
       - uses: tesslio/setup-tessl@v2
         with:
           token: ${{ secrets.TESSL_TOKEN }}
-      - run: tessl skill review path/to/SKILL.md
-      # Optionally gate on review score
-      # - run skill review --threshold 80
+      - run: tessl review run quality --workspace your-workspace path/to/SKILL.md
+      # Optionally gate on review score as well
+      # - run: tessl review run quality --workspace your-workspace --threshold 80 path/to/SKILL.md
 ```
+
+> For turn-key PR review that comments scores and required changes, use the
+> [`tesslio/skill-review`](https://github.com/tesslio/skill-review) action, which
+> wraps this command.
 
 ### Publish a plugin on push
 
@@ -109,7 +120,7 @@ jobs:
 ```yaml
 - uses: tesslio/setup-tessl@v2
   with:
-    version: "0.73.0"
+    version: "0.93.0"
     token: ${{ secrets.TESSL_TOKEN }}
 ```
 
