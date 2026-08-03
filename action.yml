@@ -32,7 +32,7 @@ runs:
         INPUT_VERSION: ${{ inputs.version }}
       run: |
         if [ "$INPUT_VERSION" = "latest" ]; then
-          VERSION="$(curl -fsSL "https://install.tessl.io/scripts/latest.sh" | grep 'TESSL_VERSION="' | head -1 | sed 's/.*TESSL_VERSION="\([^"]*\)".*/\1/')"
+          VERSION="$(curl -fsSL "https://install.tessl.io/.well-known/tessl/latest.txt" | tr -d '[:space:]')"
           if [ -z "$VERSION" ]; then
             echo "::error::Failed to resolve latest tessl version"
             exit 1
