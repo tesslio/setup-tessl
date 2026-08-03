@@ -132,6 +132,14 @@ Community actions that build on top of `setup-tessl`:
 | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | [tesslio/patch-version-publish](https://github.com/tesslio/patch-version-publish) | Publish plugins with automatic patch version bumping — queries the registry for the latest version, bumps patch, publishes, and commits the updated `.tessl-plugin/plugin.json` back. Respects manual version bumps. | Use instead of `setup-tessl` + `tessl plugin publish`. It includes `setup-tessl` internally. |
 
+## Cleanup
+
+At job completion, the action automatically runs `tessl logout` on a
+best-effort basis, clearing on-disk Tessl credentials (such as
+`~/.tessl/llm-key.json`) so they do not persist on self-hosted or otherwise
+persistent runners. This teardown never fails the job — if the CLI is missing
+or there is nothing to clear, it is a harmless no-op.
+
 ## License
 
 MIT

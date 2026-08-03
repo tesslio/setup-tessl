@@ -113,3 +113,6 @@ runs:
       run: |
         echo "::add-mask::${TESSL_TOKEN}"
         echo "TESSL_TOKEN=${TESSL_TOKEN}" >> "$GITHUB_ENV"
+
+    - name: Register Tessl logout for job completion
+      uses: ./logout
