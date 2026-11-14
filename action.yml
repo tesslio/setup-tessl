@@ -81,14 +81,21 @@ runs:
         INSTALL_DIR="${RUNNER_TOOL_CACHE}/tessl/${VERSION}/${PLATFORM}"
         mkdir -p "$INSTALL_DIR"
 
-        echo "Downloading tessl ${VERSION} for ${PLATFORM}..."
-        echo "URL: ${URL}"
+        if [ -f "${INSTALL_DIR}.complete" ] && [ -x "$INSTALL_DIR/tessl" ] && "$INSTALL_DIR/tessl" --version >/dev/null 2>&1; then
+          echo "Using cached tessl ${VERSION} for ${PLATFORM}"
+        else
+          rm -f "${INSTALL_DIR}.complete"
+          echo "Downloading tessl ${VERSION} for ${PLATFORM}..."
+          echo "URL: ${URL}"
 
-        curl -fsSL "$URL" -o "$INSTALL_DIR/tessl.tar.gz"
-        tar -xzf "$INSTALL_DIR/tessl.tar.gz" -C "$INSTALL_DIR"
-        rm "$INSTALL_DIR/tessl.tar.gz"
-        mv "$INSTALL_DIR/tessl-${VERSION}-${PLATFORM}" "$INSTALL_DIR/tessl"
-        chmod +x "$INSTALL_DIR/tessl"
+          curl -fsSL "$URL" -o "$INSTALL_DIR/tessl.tar.gz"
+          tar -xzf "$INSTALL_DIR/tessl.tar.gz" -C "$INSTALL_DIR"
+          rm "$INSTALL_DIR/tessl.tar.gz"
+          mv "$INSTALL_DIR/tessl-${VERSION}-${PLATFORM}" "$INSTALL_DIR/tessl"
+          chmod +x "$INSTALL_DIR/tessl"
+          "$INSTALL_DIR/tessl" --version
+          touch "${INSTALL_DIR}.complete"
+        fi
 
         echo "binary-path=${INSTALL_DIR}/tessl" >> "$GITHUB_OUTPUT"
 
