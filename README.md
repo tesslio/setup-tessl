@@ -124,6 +124,14 @@ jobs:
     token: ${{ secrets.TESSL_TOKEN }}
 ```
 
+## CLI cache
+
+Repeated calls for the same version and platform reuse a completed installation in `RUNNER_TOOL_CACHE`. The action checks that the cached binary can run before reuse. Incomplete entries and binaries that fail `--version` are downloaded again. Reuse depends on the runner preserving its tool cache; separate hosted jobs may start with an empty cache.
+
+## Local tests
+
+Run `python3 -m unittest discover -s tests -v` with Bash and tar available. Tests use fixture archives and a stub downloader, without network access or credentials.
+
 ## Extensions
 
 Community actions that build on top of `setup-tessl`:
